@@ -7,8 +7,6 @@
   </head>
   <script src="main.js"></script>
   <body>
-    <button type="button" onclick=generateTable()>Click Me!</button>
-
     <table id="cveTable">
         <tr>
             <th> CVE </th>
@@ -18,7 +16,15 @@
             <th> Last modified </th>
         </tr>
     </table>
-    <button id="nextPage" onclick=nextPage() disabled>Next</button>
-    <button id="lastPage" onclick=lastPage() disabled>Previous</button>
+    <!-- I'd make the numbered buttons dynamically but I don't want to-->
+    <button id="lastPage" onclick=lastPage() disabled>←</button>
+    <button id="first" onclick=choosePage(0)>1</button>
+    <button id="second" onclick=choosePage(1)>2</button>
+    <button id="third" onclick=choosePage(2)>3</button>
+    <input type="text" id="selector" value="1" maxlength="2" size="2" oninput=testfunction()>
+    <button id="thirdLast" onclick=chooseReversePage(2)>4</button>
+    <button id="secondLast" onclick=chooseReversePage(1)>5</button>
+    <button id="firstLast" onclick=chooseReversePage(0)>6</button>
+    <button id="nextPage" onclick=nextPage() disabled>→</button>
   </body>
 </html>

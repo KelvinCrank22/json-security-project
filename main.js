@@ -2,6 +2,8 @@ let pageSize = 10; // alterable for whatever reason you like
 var pageNum = 0;
 var capacity = 0;
 
+
+
 function TableRow() {
     this.id = "N/A";
     this.type = "N/A";
@@ -32,7 +34,7 @@ function generateTable() {
         .then((data) => {
             // console.log(data.CVE_Items[0].cve);
             capacity = data.CVE_data_numberOfCVEs;
-            console.log(capacity/10);
+            // console.log(capacity/10);
             var table = document.getElementById("cveTable");
             // get the first ten entries of the file
             for (let i = 0; i < pageSize; i++) {
@@ -48,6 +50,9 @@ function generateTable() {
                 row.insertCell(3).innerHTML = rowVals.impact;
                 row.insertCell(4).innerHTML = rowVals.date;
             }
+            document.getElementById("thirdLast").innerHTML = String(~~(capacity/pageSize) - 1);
+            document.getElementById("secondLast").innerHTML = String(~~(capacity/pageSize));
+            document.getElementById("firstLast").innerHTML = String(~~(capacity/pageSize) + 1);
             document.getElementById("nextPage").removeAttribute("disabled");
         })
 }
@@ -89,6 +94,19 @@ function deletePage() {
     }
 }
 
+function buttonValidator() {
+    if (pageNum == 0) {
+        document.getElementById("lastPage").setAttribute("disabled", "");
+    } else {
+        document.getElementById("lastPage").removeAttribute("disabled");
+    }
+    if (pageSize*(pageNum+1) > capacity) {
+        document.getElementById("nextPage").setAttribute("disabled", "");
+    } else {
+        document.getElementById("nextPage").removeAttribute("disabled");
+    }
+}
+
 function nextPage() {
     deletePage();
     pageNum++;
@@ -109,3 +127,34 @@ function lastPage() { // this button should start greyed out
     if (pageSize*(pageNum+1) < capacity)
         document.getElementById("nextPage").removeAttribute("disabled");
 }
+
+function testfunction() {
+    console.log(Number(document.getElementById("selector").value));
+    let retval = document.getElementById("selector").value;
+    if (!isNaN(retval) && !isNaN(parseFloat(retval))) {
+        choosePage(Number(retval));
+    } else {
+        choosePage(0);
+    }
+}
+
+function choosePage(pageChosen) {
+    deletePage();
+    if (capacity <= pageChosen*pageSize) {
+        pageNum = ~~(capacity/pageSize);
+    } else if (pageChosen < 1) {
+        pageNum = 0;
+    } else {
+        pageNum = pageChosen;
+    }
+    addPage(pageSize, pageNum);
+    buttonValidator();
+}
+
+function chooseReversePage(pageChosen) {
+    choosePage(~~(capacity/pageSize) - (pageChosen));
+}
+
+window.onload = function() {
+  generateTable();
+};
