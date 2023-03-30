@@ -1,7 +1,7 @@
 let pageSize = 10; // alterable for whatever reason you like
 var pageNum = 0;
 var capacity = 0;
-
+var pageCount = 0;
 
 
 function TableRow() {
@@ -34,10 +34,12 @@ function generateTable() {
         .then((data) => {
             // console.log(data.CVE_Items[0].cve);
             capacity = data.CVE_data_numberOfCVEs;
+            pageCount = ~~(capacity/pageSize) + 1;
             // console.log(capacity/10);
             var table = document.getElementById("cveTable");
+            var selector = document.getElementById("selector");
             // get the first ten entries of the file
-            for (let i = 0; i < pageSize; i++) {
+            for (var i = 0; i < pageSize; i++) {
                 // setup the row
                 var row = table.insertRow(i+1);
                 //     turn each entry into a table row
@@ -50,10 +52,19 @@ function generateTable() {
                 row.insertCell(3).innerHTML = rowVals.impact;
                 row.insertCell(4).innerHTML = rowVals.date;
             }
-            document.getElementById("thirdLast").innerHTML = String(~~(capacity/pageSize) - 1);
-            document.getElementById("secondLast").innerHTML = String(~~(capacity/pageSize));
-            document.getElementById("firstLast").innerHTML = String(~~(capacity/pageSize) + 1);
-            document.getElementById("nextPage").removeAttribute("disabled");
+            if (pageCount > 1) {
+                document.getElementById("nextPage").removeAttribute("disabled");
+                document.getElementById("lastPage").removeAttribute("disabled");
+            }
+            
+            // some extra stuff to make the dropdown selector the right length
+            // code basically copied from https://stackoverflow.com/questions/18417114/add-item-to-dropdown-list-in-html-using-javascript
+            // not necessarily a hard thing to come up with but I figured I should note my sources anyway
+            for (var j = 0; j < pageCount; j++) {
+                var option = document.createElement('option');
+                option.text = option.value = j + 1;
+                selector.add(option, j);
+            }
         })
 }
 
@@ -96,14 +107,18 @@ function deletePage() {
 
 function buttonValidator() {
     if (pageNum == 0) {
-        document.getElementById("lastPage").setAttribute("disabled", "");
+        document.getElementById("previousPage").setAttribute("disabled", "");
+        document.getElementById("firstPage").setAttribute("disabled", "");
     } else {
-        document.getElementById("lastPage").removeAttribute("disabled");
+        document.getElementById("previousPage").removeAttribute("disabled");
+        document.getElementById("firstPage").removeAttribute("disabled");
     }
     if (pageSize*(pageNum+1) > capacity) {
         document.getElementById("nextPage").setAttribute("disabled", "");
+        document.getElementById("lastPage").setAttribute("disabled", "");
     } else {
         document.getElementById("nextPage").removeAttribute("disabled");
+        document.getElementById("lastPage").removeAttribute("disabled");
     }
 }
 
@@ -111,21 +126,15 @@ function nextPage() {
     deletePage();
     pageNum++;
     addPage(pageSize, pageNum);
-    if (pageNum != 0)
-        document.getElementById("lastPage").removeAttribute("disabled");
-    if (pageSize*(pageNum+1) > capacity)
-        document.getElementById("nextPage").setAttribute("disabled", "");
-    console.log(pageNum);
+    buttonValidator();
+    // console.log(pageNum);
 }
 
-function lastPage() { // this button should start greyed out
+function previousPage() { // this button should start greyed out
     deletePage();
     pageNum--;
     addPage(pageSize, pageNum);
-    if (pageNum == 0)
-        document.getElementById("lastPage").setAttribute("disabled", "");
-    if (pageSize*(pageNum+1) < capacity)
-        document.getElementById("nextPage").removeAttribute("disabled");
+    buttonValidator();
 }
 
 function testfunction() {
@@ -141,7 +150,7 @@ function testfunction() {
 function choosePage(pageChosen) {
     deletePage();
     if (capacity <= pageChosen*pageSize) {
-        pageNum = ~~(capacity/pageSize);
+        pageNum = pageCount - 1;
     } else if (pageChosen < 1) {
         pageNum = 0;
     } else {
@@ -152,7 +161,7 @@ function choosePage(pageChosen) {
 }
 
 function chooseReversePage(pageChosen) {
-    choosePage(~~(capacity/pageSize) - (pageChosen));
+    choosePage(pageCount - pageChosen);
 }
 
 window.onload = function() {
